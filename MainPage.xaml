@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage 
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -15,12 +15,13 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-    
+
         <StackLayout Orientation="Horizontal"
                      Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
             <Button Text="Зберегти" Clicked="SaveButton_Clicked" />
             <Button Text="Прочитати" Clicked="ReadButton_Clicked" />
             <Button Text="Вийти" Clicked="ExitButton_Clicked" />
+            <Button Text="Очистити все" Clicked="ClearAllButton_Clicked" />
             <Button Text="Порахувати" Clicked="CalculateButton_Clicked" />
             <Button Text="Довідка" Clicked="HelpButton_Clicked" />
             <Button Text="Видалити рядок" Clicked="DeleteRowButton_Clicked" />
