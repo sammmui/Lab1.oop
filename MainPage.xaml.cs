@@ -12,6 +12,8 @@ namespace MyExcelMAUIApp
 {
     public partial class MainPage : ContentPage
     {
+        private readonly Dictionary<Entry, string> cellFormulas = new();
+
         const int CountColumn = 20;
         const int CountRow = 50;
 
@@ -96,20 +98,49 @@ namespace MyExcelMAUIApp
             }
             return columnName;
         }
-
-        private void Entry_Unfocused(object sender, FocusEventArgs e)
+        private void RecalculateAllCells()
         {
-            if (sender is Entry entry && !string.IsNullOrWhiteSpace(entry.Text))
+            foreach (var kvp in cellFormulas)
             {
-                string text = entry.Text.Trim();
-                if (text.StartsWith("="))
+                var entry = kvp.Key;
+                var formula = kvp.Value;
+
+                double result = EvaluateExpression(formula);
+                if (!double.IsNaN(result))
                 {
-                    double result = EvaluateExpression(text);
-                    if (!double.IsNaN(result))
-                        entry.Text = result.ToString(CultureInfo.InvariantCulture);
+                    entry.TextColor = Colors.Black;
+                    entry.Text = result.ToString(CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    entry.TextColor = Colors.Red;
+                    entry.Text = "Error";
                 }
             }
         }
+
+        private void Entry_Unfocused(object sender, FocusEventArgs e)
+        {
+            if (sender is Entry entry)
+            {
+                string text = entry.Text?.Trim() ?? "";
+
+              
+                if (text.StartsWith("="))
+                {
+                    cellFormulas[entry] = text;
+                }
+                else
+                {
+                 
+                    cellFormulas.Remove(entry);
+                }
+
+
+                RecalculateAllCells();
+            }
+        }
+
 
         private void CalculateButton_Clicked(object sender, EventArgs e)
         {
@@ -205,7 +236,18 @@ namespace MyExcelMAUIApp
 
         private async void HelpButton_Clicked(object sender, EventArgs e)
         {
-            await DisplayAlert("Довідка", "Лабораторна робота 1. Студентки Марії Балєєвої", "OK");
+            await DisplayAlert("Довідка",
+        "Ця програма створена для виконання лабораторної роботи №1\n" +
+        "Автор: студентка Марія Балєєва\n\n" +
+        " Доступні функції:\n" +
+        "+, -, *, / — бінарні операції\n" +
+        "<, >, = — операції порівняння\n" +
+        "inc(x) — збільшує значення x на 1\n" +
+        "dec(x) — зменшує значення x на 1\n" +
+        "mmax(a,b,...) — знаходить найбільше значення серед аргументів\n" +
+        "mmin(a,b,...) — знаходить найменше значення серед аргументів\n" +
+        "not(x) — повертає 1, якщо x=0, інакше 0\n\n",
+        "OK");
         }
 
         private void DeleteRowButton_Clicked(object sender, EventArgs e)
@@ -231,6 +273,24 @@ namespace MyExcelMAUIApp
                     grid.Children.Remove(view);
                 }
             }
+        }
+        private async void ClearAllButton_Clicked(object sender, EventArgs e)
+        {
+            bool answer = await DisplayAlert("Підтвердження", "Ви дійсно хочете очистити всі клітинки?", "Так", "Ні");
+            if (!answer)
+                return;
+
+            foreach (var child in grid.Children)
+            {
+                if (child is Entry entry)
+                {
+                    entry.Text = "";
+                    entry.TextColor = Colors.Black;
+                }
+            }
+
+            cellFormulas.Clear(); 
+            await DisplayAlert("Готово", "Усі клітинки очищено.", "OK");
         }
 
         private void DeleteColumnButton_Clicked(object sender, EventArgs e)
